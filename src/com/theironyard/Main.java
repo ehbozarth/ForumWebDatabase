@@ -39,6 +39,32 @@ public class Main {
     }//End of selectUser
 
 
+    public static void insertMessage(Connection conn, int userId, int replyId, String text) throws SQLException {
+        PreparedStatement statement = conn.prepareStatement("INSERT INTO  messages VALUES(NULL, ?, ?, ?)");
+        statement.setInt(1, userId);
+        statement.setInt(2, replyId);
+        statement.setString(3, text);
+        statement.execute();
+    }//End of insertMessage
+
+
+    public static Message selectMessage(Connection conn, int id) throws SQLException {
+        Message message = null;
+        PreparedStatement statement = conn.prepareStatement("SELECT * FROM messages " +
+                "INNER JOIN users ON messages.user_id = users.id WHERE messages.id = ?");
+        statement.setInt(1, id);
+        ResultSet results = statement.executeQuery();
+        if(results.next()){
+            message = new Message();
+            message.id = results.getInt("messages.id");
+            message.replyId = results.getInt("messages.reply_id");
+            message.username = results.getString("users.name");
+            message.text = results.getString("messages.text");
+        }//End of if
+        return message;
+    }//End of selectMessage
+
+
 
     public static void main(String[] args) throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:./main");
