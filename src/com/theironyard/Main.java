@@ -64,6 +64,24 @@ public class Main {
         return message;
     }//End of selectMessage
 
+    public static ArrayList<Message> selectReplies(Connection conn, int replyId) throws SQLException {
+        ArrayList<Message> replies = new ArrayList<>();
+        PreparedStatement statement = conn.prepareStatement("SELECT * FROM messages INNER JOIN users ON messages.user_id = users.id " +
+                "WHERE messages.reply_id = ?");
+        statement.setInt(1, replyId);
+        ResultSet results = statement.executeQuery();
+        while(results.next()){
+            Message message = new Message();
+            message.id = results.getInt("messages.id");
+            message.replyId = results.getInt("messages.reply_id");
+            message.username = results.getString("users.name");
+            message.text = results.getString("messages.text");
+            replies.add(message);
+        }//End of while loop
+
+        return replies;
+    }//End of selectReplies
+
 
 
     public static void main(String[] args) throws SQLException {
