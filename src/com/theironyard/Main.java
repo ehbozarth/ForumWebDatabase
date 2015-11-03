@@ -5,12 +5,46 @@ import spark.Session;
 import spark.Spark;
 import spark.template.mustache.MustacheTemplateEngine;
 
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void createTables(Connection conn) throws SQLException {
+        Statement statement= conn.createStatement();
+        statement.execute("CREATE TABLE IF NOT EXISTS users (id IDENTITY, name VARCHAR, password VARCHAR)");
+        statement.execute("CREATE TABLE IF NOT EXISTS messages (id IDENTITY, user_id INT, reply_id INT, text VARCHAR)");
+    }//End of createTables
+
+    public static void insertUser(Connection conn, String name, String password) throws SQLException {
+        PreparedStatement statement = conn.prepareStatement("INSERT INTO users VALUES(NULL,?,?)");
+        statement.setString(1, name);
+        statement.setString(2, password);
+        statement.execute();
+    }//End of insertUser
+
+    public static User selectUser(Connection conn, String name) throws SQLException {
+        User user = null;
+        PreparedStatement statement = conn.prepareStatement("SELECT * FROM users WHERE name = ?");
+        statement.setString(1, name);
+        ResultSet results = statement.executeQuery();
+        if(results.next()){
+            user = new User();
+            user.id = results.getInt("id");
+            user.password = results.getString("password");
+        }
+        return user;
+    }//End of selectUser
+
+
+
+    public static void main(String[] args) throws SQLException {
+        Connection conn = DriverManager.getConnection("jdbc:h2:./main");
+        createTables(conn);
+
+
 	    HashMap<String, User> users = new HashMap();
         ArrayList<Message> messages = new ArrayList();
 
